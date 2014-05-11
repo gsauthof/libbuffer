@@ -1,0 +1,3 @@
+[submodule "libixxx"]
+	path = libixxx
+	url = github:gsauthof/libixxx.git
