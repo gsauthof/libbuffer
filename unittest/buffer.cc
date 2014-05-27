@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_SUITE( buffer )
     BOOST_AUTO_TEST_CASE( lazy )
     {
       const char i[] = "Hello World!";
-      pair<const char*, const char*> inp(i, i+strlen(i));
+      pair<const char*, const char*> inp(i, i+sizeof(i)-1);
       Memory::Buffer::Vector v;
       v.start(inp.first);
       v.finish(inp.second);
@@ -250,12 +250,48 @@ BOOST_AUTO_TEST_SUITE( buffer )
     BOOST_AUTO_TEST_CASE( copy )
     {
       const char i[] = "Hello World!";
-      pair<const char*, const char*> inp(i, i+strlen(i));
+      pair<const char*, const char*> inp(i, i+sizeof(i)-1);
       Memory::Buffer::Vector v;
       v.start(inp.first);
       v.stop(inp.first+5);
+      v.cont(inp.first+5);
+      v.finish(inp.second);
+      string s(v.begin(), v.end());
+      BOOST_CHECK_EQUAL(s, "Hello World!");
+      BOOST_CHECK(    (v.begin() < inp.first && v.end() <= inp.first)
+                   || (v.begin() >= inp.second && v.end() >= inp.second) );
+    }
+
+    BOOST_AUTO_TEST_CASE( pause )
+    {
+      const char i[] = "Hello World!";
+      pair<const char*, const char*> inp(i, i+sizeof(i)-1);
+      Memory::Buffer::Vector v;
+      v.resume(inp.first);
+      v.cont(inp.first);
+      v.pause(inp.first+5);
       v.resume(inp.first+5);
       v.finish(inp.second);
+      string s(v.begin(), v.end());
+      BOOST_CHECK_EQUAL(s, "Hello World!");
+      BOOST_CHECK(    (v.begin() < inp.first && v.end() <= inp.first)
+                   || (v.begin() >= inp.second && v.end() >= inp.second) );
+    }
+
+    BOOST_AUTO_TEST_CASE( resume )
+    {
+      const char i[] = "Hello World!";
+      pair<const char*, const char*> inp(i, i+sizeof(i)-1);
+      Memory::Buffer::Vector v;
+      {
+        const char *pe = inp.first+5;
+        Memory::Buffer::Resume r(v, inp.first, pe);
+        v.cont(inp.first);
+      }
+      {
+        Memory::Buffer::Resume r(v, inp.first+5, inp.second);
+        v.finish(inp.second);
+      }
       string s(v.begin(), v.end());
       BOOST_CHECK_EQUAL(s, "Hello World!");
       BOOST_CHECK(    (v.begin() < inp.first && v.end() <= inp.first)
