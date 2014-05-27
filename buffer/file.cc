@@ -207,6 +207,9 @@ namespace Memory {
         }
       }
     }
+    void File::clear()
+    {
+    }
 
     void File::buffer_copy(const char *begin, const char *end, bool last)
     {

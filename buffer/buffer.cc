@@ -35,6 +35,19 @@ namespace Memory {
     {
     }
 
+    Resume::Resume(Base &b, const char *p, const char *&pe)
+      :
+        b(b),
+        p(p),
+        pe(pe)
+    {
+      b.resume(p);
+    }
+    Resume::~Resume()
+    {
+      b.pause(pe);
+    }
+
     Proxy::Proxy()
     {
     }
@@ -42,20 +55,25 @@ namespace Memory {
     {
       this->b = b;
     }
+    void Proxy::clear()
+    {
+      if (b)
+        b->clear();
+    }
     void Proxy::start(const char *p)
     {
       if (b)
         b->start(p);
     }
+    void Proxy::cont(const char *p)
+    {
+      if (b)
+        b->cont(p);
+    }
     void Proxy::stop(const char *p)
     {
       if (b)
         b->stop(p);
-    }
-    void Proxy::resume(const char *p)
-    {
-      if (b)
-        b->resume(p);
     }
     void Proxy::finish(const char *p)
     {
@@ -67,6 +85,16 @@ namespace Memory {
       if (b)
         b->finish();
     }
+    void Proxy::resume(const char *p)
+    {
+      if (b)
+        b->resume(p);
+    }
+    void Proxy::pause(const char *p)
+    {
+      if (b)
+        b->pause(p);
+    }
     void Proxy::buffer_copy(const char *begin, const char *end,
             bool last)
     {
@@ -74,17 +102,23 @@ namespace Memory {
         b->buffer_copy(begin, end, last);
     }
 
+    void Caller::clear()
+    {
+      throw logic_error("clear not implemented");
+    }
     void Caller::start(const char *p)
     {
       assert(p);
       first = p;
+      active_ = true;
     }
     // two methods such that sub-classes
     // can something different
-    void Caller::resume(const char *p)
+    void Caller::cont(const char *p)
     {
       assert(p);
       first = p;
+      active_ = true;
     }
     void Caller::stop(const char *p)
     {
@@ -92,6 +126,7 @@ namespace Memory {
         return;
       buffer_copy(first, p, false);
       first = nullptr;
+      active_ = false;
     }
     void Caller::finish(const char *p)
     {
@@ -99,12 +134,28 @@ namespace Memory {
         return;
       buffer_copy(first, p, true);
       first = nullptr;
+      active_ = false;
     }
     void Caller::finish()
     {
       if (!first)
         return;
       buffer_copy(nullptr, nullptr, true);
+      first = nullptr;
+      active_ = false;
+    }
+    void Caller::resume(const char *p)
+    {
+      assert(p);
+      if (!active_)
+        return;
+      first = p;
+    }
+    void Caller::pause(const char *p)
+    {
+      if (!active_)
+        return;
+      buffer_copy(first, p, false);
       first = nullptr;
     }
 
@@ -179,6 +230,13 @@ namespace Memory {
         return range_.second - range_.first;
       else
         return v.size();
+    }
+    bool Vector::empty() const
+    {
+      if (v.empty())
+        return range_.second - range_.first == 0;
+      else
+        return false;
     }
     Vector::const_iterator Vector::begin() const
     {

@@ -22,14 +22,13 @@ libbuffer - C++ library for managing buffers during lexing
         // The observer can then access the contents via buffer.begin(), buffer.end()
       }
 
-      void read_more(const char *begin, const char *end)
+      void read_some(const char *begin, const char *end)
       {
-        buffer.resume(begin);
+        Memory::Buffer::Resume bur(buffer, begin, end);
         // ..
         // execute some lexing state machine
         // which may call number_begin()/number_end()
         // ..
-        buffer.stop(end);
       }
     }
 

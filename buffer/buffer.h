@@ -32,18 +32,36 @@ namespace Memory {
 
     class Base {
       private:
+      protected:
+        bool active_ {false};
       public:
         virtual ~Base();
 
+        virtual void clear() = 0;
+
         virtual void start(const char *p) = 0;
+        virtual void cont(const char *p) = 0;
+
         virtual void stop(const char *p) = 0;
-        virtual void resume(const char *p) = 0;
         virtual void finish(const char *p) = 0;
         virtual void finish() = 0;
+
+        virtual void resume(const char *p) = 0;
+        virtual void pause(const char *p) = 0;
 
         virtual void buffer_copy(const char *begin, const char *end,
             bool last) = 0;
 
+    };
+
+    class Resume {
+      private:
+        Base &b;
+        const char *p {nullptr};
+        const char *&pe;
+      public:
+        Resume(Base &b, const char *p, const char *&pe);
+        ~Resume();
     };
 
     class Proxy : public Base {
@@ -54,11 +72,17 @@ namespace Memory {
         Proxy();
         void set(Base *b);
 
+        void clear() override;
+
         void start(const char *p) override;
+        void cont(const char *p) override;
+
         void stop(const char *p) override;
-        void resume(const char *p) override;
         void finish(const char *p) override;
         void finish() override;
+
+        void resume(const char *p) override;
+        void pause(const char *p) override;
 
         void buffer_copy(const char *begin, const char *end,
             bool last) override;
@@ -69,11 +93,17 @@ namespace Memory {
       private:
         const char* first { nullptr };
       public:
+        void clear() override;
+
         void start(const char *p) override;
+        void cont(const char *p) override;
+
         void stop(const char *p) override;
-        void resume(const char *p) override;
         void finish(const char *p) override;
-        void finish() override;;
+        void finish() override;
+
+        void resume(const char *p) override;
+        void pause(const char *p) override;
     };
 
     class Vector : public Caller {
@@ -89,14 +119,16 @@ namespace Memory {
         Vector &operator=(Vector &&o);
 
         void start(const char *p) override;
+
         void commit();
 
         void buffer_copy(const char *begin, const char *end, bool last)
           override;
 
-        void clear() ;
+        void clear() override;
         const char *data() const ;
         size_t size() const ;
+        bool empty() const ;
         typedef const char * const_iterator ;
         const_iterator begin() const ;
         const_iterator end() const ;

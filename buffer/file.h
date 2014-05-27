@@ -71,6 +71,8 @@ namespace Memory {
         void close();
         void set_sync(bool b);
 
+        void clear() override;
+
         void buffer_copy(const char *begin, const char *end, bool last)
           override;
 
