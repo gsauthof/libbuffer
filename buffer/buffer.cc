@@ -38,7 +38,7 @@ namespace Memory {
     Resume::Resume(Base &b, const char *p, const char *&pe)
       :
         b(b),
-        p(p),
+        //p(p),
         pe(pe)
     {
       b.resume(p);

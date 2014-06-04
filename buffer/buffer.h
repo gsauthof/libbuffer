@@ -57,7 +57,7 @@ namespace Memory {
     class Resume {
       private:
         Base &b;
-        const char *p {nullptr};
+        //const char *p {nullptr};
         const char *&pe;
       public:
         Resume(Base &b, const char *p, const char *&pe);
