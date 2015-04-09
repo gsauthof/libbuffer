@@ -130,6 +130,7 @@ namespace Memory {
       dir_ = o.dir_;
       o.dir_ = nullptr;
       dir_path_ = std::move(o.dir_path_);
+      o.dir_path_.clear();
       fd = o.fd;
       o.fd = -1;
       f = o.f;
