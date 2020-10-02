@@ -59,7 +59,7 @@ namespace Memory {
   {
     try {
       close();
-    } catch (exception) {
+    } catch (const exception&) {
     }
   }
   int Dir::fd() const
@@ -145,7 +145,7 @@ namespace Memory {
     {
       try {
         close();
-      } catch(const exception)
+      } catch(const exception &)
       {
         // we must not throw an exception from a destructor
         (void)0;
@@ -212,7 +212,7 @@ namespace Memory {
     {
     }
 
-    void File::buffer_copy(const char *begin, const char *end, bool last)
+    void File::buffer_copy(const char *begin, const char *end, bool /* last */)
     {
       ansi::fwrite(begin, 1, end-begin, f);
     }
